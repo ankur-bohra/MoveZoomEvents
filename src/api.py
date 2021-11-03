@@ -110,7 +110,7 @@ def get_user_info(credentials):
 
 today = datetime.datetime.combine(datetime.date.today(), datetime.time()).astimezone()
 midnight = today + datetime.timedelta(days=1)
-def copyZoomEventsToPrimary():
+def moveZoomEvents():
     service = get_service()
     events = service.events()
 
@@ -134,4 +134,4 @@ def copyZoomEventsToPrimary():
     return new_events
 
 if __name__ == '__main__':
-    copyZoomEventsToPrimary()
+    moveZoomEvents()
