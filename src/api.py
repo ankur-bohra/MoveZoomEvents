@@ -1,5 +1,6 @@
-import os
 import datetime
+import os
+import sys
 from typing import Dict, List, Optional, Sequence, Type, Union
 
 from google.auth.exceptions import RefreshError
@@ -14,7 +15,7 @@ scopes = [
     'openid'
 ]
 
-
+global toast
 def get_creds(scopes: Sequence[str], data_folder: str = 'data',
               show_auth_prompt: bool = True, reuse_creds: bool = True) -> Type[Credentials]:
     '''Get/create user credentials in given folder with specified scopes.
@@ -46,6 +47,15 @@ def get_creds(scopes: Sequence[str], data_folder: str = 'data',
                 creds = None
         
         if not creds or creds.expired:
+            global toast
+            if toast:
+                toast.show_toast(
+                    "Authorization Required", 
+                    "Authorization is required to move events in your calendar on your behalf, you will be guided to authorize on your default browser soon.",
+                    duration=10,
+                    icon_path="data/MoveZoomEvents.ico",
+                    threaded=True
+                )
             flow = InstalledAppFlow.from_client_secrets_file(
                 data_folder+'\\client_secret.json', scopes)
             if show_auth_prompt:
@@ -53,6 +63,14 @@ def get_creds(scopes: Sequence[str], data_folder: str = 'data',
             else:
                 creds = flow.run_local_server(
                     port=0, authorization_prompt_message='')
+            if toast:
+                toast.show_toast(
+                    "Authorization Successful",
+                    "MoveZoomEvents was successfully authorized for " + get_user_info(creds).get('name'),
+                    duration=7,
+                    icon_path="data/MoveZoomEvents.ico",
+                    threaded=True
+                )
         # Save the credentials for the next run
         with open(data_folder+'\\token.json', 'w') as token:
             token.write(creds.to_json())
@@ -121,7 +139,10 @@ def is_zoom_event(description):
 
 today = datetime.datetime.combine(datetime.date.today(), datetime.time()).astimezone()
 midnight = today + datetime.timedelta(days=1)
-def move_zoom_events():
+def move_zoom_events(given_toast=None):
+    if given_toast:
+        global toast
+        toast = given_toast
     service = get_service()
     events = service.events()
 
@@ -142,7 +163,13 @@ def move_zoom_events():
                             'summary': event['summary'].split(']')[1]
                         }).execute()
                         events.move(calendarId=calendar_id, eventId=event['id'], destination='primary').execute()
+                        print("Moved " + event['summary'])
+                    else:
+                        print(event['summary'], "not Zoom event")
     return new_events
 
 if __name__ == '__main__':
     move_zoom_events()
+else:
+    sys.stdout = open("data/logs.txt", "w")
+    sys.stderr = open("data/errors.txt", "w")
