@@ -2,6 +2,7 @@ import os
 import datetime
 from typing import Dict, List, Optional, Sequence, Type, Union
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -37,8 +38,14 @@ def get_creds(scopes: Sequence[str], data_folder: str = 'data',
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                # This part is for development while the app is in testing mode
+                # Treat a RefreshError same as complete absence of creds
+                creds = None
+        
+        if not creds or creds.expired:
             flow = InstalledAppFlow.from_client_secrets_file(
                 data_folder+'\\client_secret.json', scopes)
             if show_auth_prompt:
