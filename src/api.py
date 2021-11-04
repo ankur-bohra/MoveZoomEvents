@@ -115,6 +115,10 @@ def get_user_info(credentials):
     user_info = user_info_service.userinfo().get().execute()
     return user_info
 
+
+def is_zoom_event(description):
+    return 'zoom' in description
+
 today = datetime.datetime.combine(datetime.date.today(), datetime.time()).astimezone()
 midnight = today + datetime.timedelta(days=1)
 def moveZoomEvents():
@@ -132,7 +136,7 @@ def moveZoomEvents():
                 timeMax=midnight.isoformat()
             ).execute()['items']
             for event in calendar_events:
-                    if 'zoom' in event['description']:
+                    if is_zoom_event(event['description']):
                         new_events.append(event['summary'])
                         events.patch(calendarId=calendar_id, eventId=event['id'], body={
                             'summary': event['summary'].split(']')[1]
