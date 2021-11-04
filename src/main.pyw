@@ -1,8 +1,8 @@
 from win10toast import ToastNotifier
-from api import moveZoomEvents
+from api import move_zoom_events
 toast = ToastNotifier()
 try:
-	new_events = moveZoomEvents()
+	new_events = move_zoom_events()
 	if len(new_events) != 0:
 		message = f"{len(new_events)} events were moved to your primary calendar:\n"
 		message += "\n".join(new_events)

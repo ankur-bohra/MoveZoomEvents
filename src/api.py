@@ -121,7 +121,7 @@ def is_zoom_event(description):
 
 today = datetime.datetime.combine(datetime.date.today(), datetime.time()).astimezone()
 midnight = today + datetime.timedelta(days=1)
-def moveZoomEvents():
+def move_zoom_events():
     service = get_service()
     events = service.events()
 
@@ -145,4 +145,4 @@ def moveZoomEvents():
     return new_events
 
 if __name__ == '__main__':
-    moveZoomEvents()
+    move_zoom_events()
