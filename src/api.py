@@ -134,8 +134,18 @@ def get_user_info(credentials):
     return user_info
 
 
-def is_zoom_event(description):
+def is_zoom_event(description: str) -> bool:
     return 'zoom' in description
+
+def get_event_name(event: Dict[str, Any]) -> str:
+    '''Constructs the new event name from the original event object.
+
+    Args:
+        event: The original event
+    
+    Returns: The new event name
+    '''
+    return event['summary'].split(']')[1]
 
 today = datetime.datetime.combine(datetime.date.today(), datetime.time()).astimezone()
 midnight = today + datetime.timedelta(days=1)
@@ -160,7 +170,7 @@ def move_zoom_events(given_toast=None):
                     if is_zoom_event(event['description']):
                         new_events.append(event['summary'])
                         events.patch(calendarId=calendar_id, eventId=event['id'], body={
-                            'summary': event['summary'].split(']')[1]
+                            'summary': get_event_name(event)
                         }).execute()
                         events.move(calendarId=calendar_id, eventId=event['id'], destination='primary').execute()
                         print("Moved " + event['summary'])
