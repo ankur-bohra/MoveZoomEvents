@@ -137,7 +137,7 @@ def get_user_info(credentials):
 def is_zoom_event(description: str) -> bool:
     return 'zoom' in description
 
-def get_event_name(event: Dict[str, Any]) -> str:
+def get_event_name(event: Dict[str, any]) -> str:
     '''Constructs the new event name from the original event object.
 
     Args:
